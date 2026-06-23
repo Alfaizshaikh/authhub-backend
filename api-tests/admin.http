@@ -1,0 +1,25 @@
+### Get All Users
+
+GET http://localhost:3000/users
+Authorization: Bearer ADMIN_TOKEN_HERE
+
+
+###
+
+### Promote User
+
+PATCH http://localhost:3000/users/2/role
+Authorization: Bearer ADMIN_TOKEN_HERE
+Content-Type: application/json
+
+{
+    "role":"admin"
+}
+
+
+###
+
+### Delete User
+
+DELETE http://localhost:3000/users/2
+Authorization: Bearer ADMIN_TOKEN_HERE
