@@ -59,6 +59,12 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 // ==========================================
 
 // Mount route files to specific API paths
+// Add these lines to allow /auth/register to work even without /api/
+app.use('/auth', authRoutes);
+app.use('/posts', postRoutes);
+app.use('/admin', adminRoutes);
+
+// And keep your existing routes below as well:
 app.use('/api/auth', authRoutes);
 app.use('/api/posts', postRoutes);
 app.use('/api/admin', adminRoutes);
