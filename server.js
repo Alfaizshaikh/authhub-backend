@@ -52,20 +52,6 @@ app.use('/api/auth', authRoutes);
 app.use('/api/posts', postRoutes);
 app.use('/api/admin', adminRoutes);
 
-// Catch-all for undefined routes (404)
-app.use('*', (req, res, next) => {
-    const error = new Error(`Cannot find ${req.originalUrl} on this server`);
-    error.status = 404;
-    next(error);
-});
-
-// ==========================================
-// 3. ERROR HANDLING
-// ==========================================
-
-// Centralized error handler (Must be the last middleware!)
-app.use(errorHandler);
-// TEMPORARY SETUP ROUTE - Run this ONCE to create tables
 app.get('/api/setup-database', async (req, res) => {
     const db = require('./db'); 
     
@@ -100,6 +86,20 @@ app.get('/api/setup-database', async (req, res) => {
         res.status(500).send("❌ Error: " + err.message);
     }
 });
+// Catch-all for undefined routes (404)
+app.use('*', (req, res, next) => {
+    const error = new Error(`Cannot find ${req.originalUrl} on this server`);
+    error.status = 404;
+    next(error);
+});
+
+// ==========================================
+// 3. ERROR HANDLING
+// ==========================================
+
+// Centralized error handler (Must be the last middleware!)
+app.use(errorHandler);
+
 // ==========================================
 // 4. SERVER INITIALIZATION
 // ==========================================
