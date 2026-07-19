@@ -17,14 +17,24 @@ const db = require('./config/db'); // Ensure this matches your ACTUAL file path
 const app = express();
 
 // ==========================================
-// 1. AUTO-SETUP: Verify Tables on Startup
+// 1. AUTO-SETUP: Verify Tables & Columns
 // ==========================================
 (async () => {
     try {
         console.log("Checking/Creating database tables...");
+        // Tables
         await db.query(`CREATE TABLE IF NOT EXISTS users (id INT AUTO_INCREMENT PRIMARY KEY, name VARCHAR(255) NOT NULL, email VARCHAR(255) NOT NULL UNIQUE, password VARCHAR(255) NOT NULL, role ENUM('user', 'admin') DEFAULT 'user', created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)`);
         await db.query(`CREATE TABLE IF NOT EXISTS posts (id INT AUTO_INCREMENT PRIMARY KEY, user_id INT NOT NULL, title VARCHAR(255) NOT NULL, content TEXT NOT NULL, image VARCHAR(255), created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE)`);
         await db.query(`CREATE TABLE IF NOT EXISTS subscriptions (id INT AUTO_INCREMENT PRIMARY KEY, user_id INT NOT NULL, plan VARCHAR(50), status VARCHAR(20), created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE)`);
+        
+        // ADDING MISSING COLUMNS (The Fix)
+        try {
+            await db.query('ALTER TABLE users ADD COLUMN post_limit INT DEFAULT 5');
+            console.log("✅ Added missing column: post_limit");
+        } catch (err) {
+            console.log("Note: post_limit column likely already exists.");
+        }
+
         console.log("✅ Database tables are verified and ready.");
     } catch (err) {
         console.error("❌ Auto-setup failed: ", err.message);
@@ -48,17 +58,21 @@ app.use('/api/uploads', express.static(path.join(__dirname, 'uploads')));
 // 3. ROUTERS
 // ==========================================
 
-// Route for manual setup (Keep this clean and defined once)
+// Manual Setup Route (Updated with the fix)
 app.get('/api/setup-database', async (req, res) => {
     try {
         await db.query(`CREATE TABLE IF NOT EXISTS users (id INT AUTO_INCREMENT PRIMARY KEY, name VARCHAR(255) NOT NULL, email VARCHAR(255) NOT NULL UNIQUE, password VARCHAR(255) NOT NULL, role ENUM('user', 'admin') DEFAULT 'user', created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)`);
         await db.query(`CREATE TABLE IF NOT EXISTS posts (id INT AUTO_INCREMENT PRIMARY KEY, user_id INT NOT NULL, title VARCHAR(255) NOT NULL, content TEXT NOT NULL, image VARCHAR(255), created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE)`);
         await db.query(`CREATE TABLE IF NOT EXISTS subscriptions (id INT AUTO_INCREMENT PRIMARY KEY, user_id INT NOT NULL, plan VARCHAR(50), status VARCHAR(20), created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE)`);
-        res.send("✅ Success! All tables created.");
+        
+        // Add column
+        try { await db.query('ALTER TABLE users ADD COLUMN post_limit INT DEFAULT 5'); } catch(e) {}
+        
+        res.send("✅ Success! Database structure updated.");
     } catch (err) { res.status(500).send("❌ Error: " + err.message); }
 });
 
-// Mount Routes (Keeping both paths for safety)
+// Mount Routes
 app.use('/auth', authRoutes);
 app.use('/posts', postRoutes);
 app.use('/admin', adminRoutes);
