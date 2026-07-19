@@ -22,7 +22,7 @@ const app = express();
 // 1. GLOBAL MIDDLEWARE (Security & Parsing)
 // ==========================================
 app.use(cors({
-    origin: 'https://your-live-domain.com', // Replace with your actual frontend URL
+    origin: 'https://authhub-frontend-2uwl.onrender.com', // Replace with your actual frontend URL
     credentials: true
 }));
 app.use(helmet({
