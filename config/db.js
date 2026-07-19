@@ -1,26 +1,30 @@
 const mysql = require('mysql2/promise');
 
-// Create a connection pool rather than a single connection
+// Create a connection pool
 const dbPool = mysql.createPool({
-    host: process.env.DB_HOST || 'localhost',
-    user: process.env.DB_USER || 'root',
-    password: process.env.DB_PASSWORD || '',
-    database: process.env.DB_NAME || 'node_auth',
+    host: process.env.DB_HOST,
+    user: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
+    database: process.env.DB_NAME,
+    // Fix: Added the port variable
+    port: parseInt(process.env.DB_PORT) || 3306, 
     
     // Pool specific configurations:
     waitForConnections: true,
-    connectionLimit: 10, // Max number of concurrent connections
-    queueLimit: 0        // Unlimited queueing for pending requests
+    connectionLimit: 10,
+    queueLimit: 0
 });
 
-// Optional: Ping the database to ensure the pool is working on startup
+// Test the connection on startup
 dbPool.getConnection()
     .then(connection => {
-        console.log('✅ Database connected successfully.');
-        connection.release(); // Always release the connection back to the pool!
+        console.log('✅ Database connected successfully to ' + process.env.DB_HOST);
+        connection.release();
     })
     .catch(err => {
-        console.error('❌ Database connection failed:', err.message);
+        console.error("❌ Database connection failed: ", err.message);
+        // This will now crash the app explicitly so you know what is wrong
+        process.exit(1);
     });
 
 module.exports = dbPool;
