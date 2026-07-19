@@ -65,7 +65,41 @@ app.use('*', (req, res, next) => {
 
 // Centralized error handler (Must be the last middleware!)
 app.use(errorHandler);
+// TEMPORARY SETUP ROUTE - Run this ONCE to create tables
+app.get('/api/setup-database', async (req, res) => {
+    const db = require('./db'); 
+    
+    try {
+        // Create Users Table first
+        await db.query(`
+            CREATE TABLE IF NOT EXISTS users (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                name VARCHAR(255) NOT NULL,
+                email VARCHAR(255) NOT NULL UNIQUE,
+                password VARCHAR(255) NOT NULL,
+                role ENUM('user', 'admin') DEFAULT 'user',
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        `);
 
+        // Create Posts Table second
+        await db.query(`
+            CREATE TABLE IF NOT EXISTS posts (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                user_id INT NOT NULL,
+                title VARCHAR(255) NOT NULL,
+                content TEXT NOT NULL,
+                image VARCHAR(255),
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+            )
+        `);
+
+        res.send("✅ Tables created successfully!");
+    } catch (err) {
+        res.status(500).send("❌ Error: " + err.message);
+    }
+});
 // ==========================================
 // 4. SERVER INITIALIZATION
 // ==========================================
