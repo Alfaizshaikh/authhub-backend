@@ -1,34 +1,20 @@
 const express = require("express");
-
 const router = express.Router();
 
-const {
-    register,
-    login
-} = require("../controllers/authController");
+// Middleware
+const verifyToken = require("../middleware/verifyToken");
+const { authLimiter } = require("../middleware/rateLimiter");
+const { validateRegister, validateLogin } = require("../validators/authValidator");
 
-const {
-    validateRegister,
-    validateLogin
-} = require("../validators/authValidator");
+// Controllers
+const authController = require("../controllers/authController");
 
-router.post(
-    "/register",
-    register
-);
-router.post(
-    "/login",
-    login
-);
-router.post(
-    "/register",
-    validateRegister,
-    register
-);
-router.post(
-    "/login",
-    validateLogin,
-    login
-);
+// Public Routes (Rate limited & Validated)
+router.post("/register", authLimiter, validateRegister, authController.register);
+router.post("/login", authLimiter, validateLogin, authController.login);
+
+// Protected Routes (Require Token)
+router.get("/profile", verifyToken, authController.profile); // Moved from profileRoutes.js!
+router.patch("/change-password", verifyToken, authController.changePassword);
 
 module.exports = router;

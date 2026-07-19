@@ -1,66 +1,83 @@
-# Role Based Authentication System
+````markdown
+# Secure Auth & Community API
 
-A backend authentication system built using **Node.js, Express.js, and MySQL**.
-This project implements secure user authentication and role-based authorization using **JWT tokens**, **bcrypt password hashing**, and middleware-based access control.
+A production-ready backend REST API built using **Node.js, Express.js, and MySQL**.
 
----
-
-# Features
-
-- User registration
-- User login
-- Password hashing using bcrypt
-- JWT-based authentication
-- Protected routes
-- Role-based access control (RBAC)
-- User profile API
-- Admin user management
-- Promote user role
-- Delete user
-- MySQL database integration
-- Input validation middleware
-- Global error handling middleware
+This project serves as the backend for a decoupled developer community platform. It provides secure user authentication, role-based authorization, protected file uploads, and enterprise-grade security practices suitable for real-world deployment.
 
 ---
 
-# Tech Stack
+# 🚀 Key Features
+
+- **Secure Authentication**
+  - User registration and login using **bcrypt** password hashing and **JWT (JSON Web Tokens)**.
+
+- **Role-Based Access Control (RBAC)**
+  - Separate permissions for **User** and **Admin** roles.
+
+- **Community Posts**
+  - Create, view, and delete posts.
+  - Supports image uploads with each post.
+
+- **Secure File Uploads**
+  - Image validation using **Multer**.
+  - MIME-type verification.
+  - Filename sanitization.
+  - Upload restrictions for improved security.
+
+- **Enterprise-Level Security**
+  - Secure HTTP headers using **Helmet.js**.
+  - Cross-Origin Resource Sharing (CORS).
+  - Express Rate Limiting to prevent brute-force attacks and abuse.
+
+- **Database Optimization**
+  - MySQL2 Promise API.
+  - Connection Pooling for efficient concurrent database access.
+
+- **Automated Testing**
+  - API testing using **Jest** and **Supertest**.
+  - Continuous Integration with **GitHub Actions**.
+
+---
+
+# 🛠️ Tech Stack
 
 ## Backend
-
 - Node.js
 - Express.js
 
 ## Database
-
 - MySQL
+- mysql2 (Promise Wrapper)
 
 ## Security
+- bcryptjs
+- jsonwebtoken
+- helmet
+- express-rate-limit
+- cors
 
-- bcrypt
-- JSON Web Token (JWT)
+## File Upload
+- multer
 
-## Tools
-
-- VS Code REST Client
-- XAMPP MySQL
+## Testing
+- Jest
+- Supertest
 
 ---
 
-# Installation
+# ⚙️ Installation & Setup
 
-## 1. Clone Repository
-
-```bash
-git clone your-repository-link
-```
-
-## 2. Navigate to Project
+## 1. Clone the Repository
 
 ```bash
-cd project_name
+git clone https://github.com/your-username/node-auth.git
+cd node-auth
 ```
 
-## 3. Install Dependencies
+---
+
+## 2. Install Dependencies
 
 ```bash
 npm install
@@ -68,170 +85,219 @@ npm install
 
 ---
 
-# Environment Variables
+## 3. Configure Environment Variables
 
 Create a `.env` file in the project root.
 
-Example:
-
 ```env
 PORT=3000
+NODE_ENV=development
 
 DB_HOST=localhost
 DB_USER=root
 DB_PASSWORD=
-DB_NAME=your_dbname
+DB_NAME=node_auth
 
-JWT_SECRET=your_secret_key
+JWT_SECRET=your_super_secret_64_character_string
+
+MAX_POSTS=25
 ```
 
 ---
 
-# Run Application
+## 4. Database Setup
 
-Start the server:
+1. Create a MySQL database:
+
+```sql
+CREATE DATABASE node_auth;
+```
+
+2. Import the required database tables:
+
+- users
+- posts
+
+---
+
+## 5. Run the Application
+
+### Development Mode
 
 ```bash
-node server.js
+npm run dev
 ```
 
-Expected output:
+### Production Mode
 
-```text
-Server running on 3000
-MySQL Connected
+```bash
+npm start
 ```
 
 ---
 
-# API Endpoints
+# 🌐 API Endpoints
+
+> **Note:** Protected endpoints require a valid JWT.
+
+```
+Authorization: Bearer <token>
+```
+
+---
 
 ## Authentication
 
-### Register User
+Base Route:
 
-```http
-POST /auth/register
+```
+/api/auth
 ```
 
-### Login User
-
-```http
-POST /auth/login
-```
+| Method | Endpoint | Description |
+|---------|----------|-------------|
+| POST | `/register` | Register a new user |
+| POST | `/login` | Login and receive JWT |
+| GET | `/profile` | Get logged-in user profile *(Protected)* |
 
 ---
 
-## User
+## Community Posts
 
-### Get Profile
+Base Route:
 
-```http
-GET /profile
+```
+/api/posts
 ```
 
-Requires:
-
-```http
-Authorization: Bearer TOKEN
-```
+| Method | Endpoint | Description |
+|---------|----------|-------------|
+| GET | `/` | Get all community posts |
+| GET | `/my-posts` | Get logged-in user's posts *(Protected)* |
+| POST | `/` | Create a post with image *(Protected)* |
+| DELETE | `/:id` | Delete a post *(Protected)* |
 
 ---
 
-## Admin
+## Admin Routes
 
-### Get All Users
+Base Route:
 
-```http
-GET /users
+```
+/api/admin
 ```
 
-Admin access required.
+| Method | Endpoint | Description |
+|---------|----------|-------------|
+| GET | `/users` | Get all users *(Admin Only)* |
+| PATCH | `/users/:id/role` | Update user role *(Admin Only)* |
+| DELETE | `/users/:id` | Delete user *(Admin Only)* |
 
 ---
 
-### Update User Role
+# 🧪 Automated Testing
 
-```http
-PATCH /users/:id/role
+Run the complete Jest test suite.
+
+```bash
+npm test
 ```
 
-Example body:
+The test suite covers:
 
-```json
-{
-    "role":"admin"
-}
-```
+- Authentication
+- Authorization
+- JWT validation
+- Protected routes
+- Error handling
+- API endpoint responses
 
 ---
 
-### Delete User
+# 🔒 Security Practices
 
-```http
-DELETE /users/:id
-```
+### Password Security
 
-Admin access required.
+- Passwords are never stored in plain text.
+- Salted and hashed using **bcrypt**.
 
 ---
 
-# Project Structure
+### Stateless Authentication
+
+- Authentication handled entirely using **JWT**.
+- No server-side sessions.
+
+---
+
+### SQL Injection Protection
+
+- All database queries use **parameterized statements** with `mysql2/promise`.
+
+---
+
+### Rate Limiting
+
+- Global API rate limiting.
+- Protection against brute-force login attempts.
+- Helps mitigate DDoS attacks.
+
+---
+
+### HTTP Security Headers
+
+Implemented using **Helmet.js**, including protection for:
+
+- XSS
+- Clickjacking
+- MIME sniffing
+- CORB
+- COEP
+
+---
+
+### CORS Protection
+
+Cross-Origin Resource Sharing is configured to allow only trusted origins.
+
+---
+
+### Secure File Uploads
+
+Uploads are protected through:
+
+- MIME type validation
+- File extension validation
+- Filename sanitization
+- Restricted upload directory
+
+---
+
+# 📂 Project Structure
 
 ```
 node-auth/
-
 │
 ├── config/
-│
 ├── controllers/
-│
 ├── middleware/
-│
 ├── models/
-│
 ├── routes/
-│
-├── validators/
-│
-├── api-tests/
-│
+├── uploads/
+├── tests/
+├── utils/
 ├── .env
-├── .env.example
-├── .gitignore
+├── app.js
+├── server.js
 ├── package.json
-├── README.md
-└── server.js
+└── README.md
 ```
 
 ---
+# 📄 About This Project
 
-# Testing APIs
+This is a personal portfolio project built to demonstrate modern backend development practices and real-world API architecture. It focuses on security, scalability, maintainability, and clean code principles using **Node.js, Express.js, and MySQL**.
 
-This project uses **VS Code REST Client** for API testing.
+The project will be deployed publicly and maintained as part of my software development portfolio. Feedback, suggestions, and contributions are always welcome.
+````
 
-API request files are available inside:
-
-```
-api-tests/
-```
-
-Available tests:
-
-```
-register.http
-login.http
-profile.http
-admin.http
-```
-
----
-
-# Security Practices Implemented
-
-- Passwords are never stored in plain text
-- Password hashing using bcrypt
-- JWT token authentication
-- Role-based route protection
-- Environment variables for sensitive information
-- SQL injection protection using parameterized queries

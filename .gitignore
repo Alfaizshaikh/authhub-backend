@@ -1,2 +1,12 @@
+# Dependencies
 node_modules/
+
+# Environment variables (CRITICAL)
 .env
+
+# Uploaded files (Ignore everything inside, but keep the folder)
+uploads/*
+!uploads/.gitkeep
+
+# Testing coverage
+coverage/
